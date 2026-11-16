@@ -1,64 +1,139 @@
+
 package com.sgc.principal;
 
 import com.sgc.dao.OrganizacionDAO;
 import com.sgc.modelo.Organizacion;
 
 public class PruebaOrganizacionDAO {
+
     public static void main(String[] args) {
 
         OrganizacionDAO dao = new OrganizacionDAO();
 
-        Organizacion organizacion = new Organizacion(
-            "Organizacion de prueba SGC",
-            "PRUEBA001",
-            "Bogota",
-            "3001234567",
-            "prueba@sgc.com"
+        System.out.println("==================================");
+        System.out.println(" PRUEBAS DEL MODULO ORGANIZACIONES");
+        System.out.println("==================================");
+
+        // PRUEBA 1: Rechazar nombre vacío
+        System.out.println("\nPRUEBA 1: Nombre obligatorio");
+
+        Organizacion sinNombre = new Organizacion(
+                "", "TEST001", "Bogota", "3001234567",
+                "test@sgc.com"
         );
 
-        // Prueba 1: validar que el nombre sea obligatorio
-organizacion.setNombre("Organizacion de prueba SGC");
-organizacion.setIdentificacion("PRUEBA002");
-organizacion.setCorreo("prueba002@sgc.com");
+        boolean resultadoNombre = dao.registrar(sinNombre);
+        System.out.println("Resultado esperado: registro rechazado");
+        System.out.println("Resultado obtenido: "
+                + (resultadoNombre ? "No esperado" : "Registro rechazado"));
 
-boolean registrado = dao.registrar(organizacion);
+        // PRUEBA 2: Rechazar correo inválido
+        System.out.println("\nPRUEBA 2: Correo inválido");
 
-if (registrado) {
-    System.out.println("Organizacion registrada correctamente.");
-} else {
-    System.out.println("No fue posible registrar la organizacion.");
-}
+        Organizacion correoInvalido = new Organizacion(
+                "Organizacion prueba correo",
+                "TEST002",
+                "Bogota",
+                "3001234567",
+                "correo-invalido"
+        );
 
-        System.out.println("\nListado de organizaciones:");
+        boolean resultadoCorreo = dao.registrar(correoInvalido);
+        System.out.println("Resultado esperado: registro rechazado");
+        System.out.println("Resultado obtenido: "
+                + (resultadoCorreo ? "No esperado" : "Registro rechazado"));
+// PRUEBA 3: Rechazar identificación duplicada
+System.out.println("\nPRUEBA 3: Identificación duplicada");
+
+Organizacion duplicada = new Organizacion(
+        "Organizacion duplicada",
+        "PRUEBA002",
+        "Bogota",
+        "3001234567",
+        "duplicada@sgc.com"
+);
+
+boolean resultadoDuplicado = dao.registrar(duplicada);
+
+System.out.println("Resultado esperado: registro rechazado");
+System.out.println("Resultado obtenido: "
+        + (resultadoDuplicado ? "No esperado" : "Registro rechazado"));
+        // PRUEBA 4: Registrar organización válida
+        System.out.println("\nPRUEBA 4: Registro válido");
+
+        Organizacion nueva = new Organizacion(
+                "Organizacion de prueba EV02",
+                "EV02TEST001",
+                "Bogota",
+                "3001234567",
+                "ev02@sgc.com"
+        );
+
+        boolean registrado = dao.registrar(nueva);
+
+        if (!registrado) {
+            System.out.println("No fue posible registrar la organización.");
+            return;
+        }
+
+        System.out.println("Organización registrada correctamente.");
+
+        // PRUEBA 5: Consultar organizaciones
+        System.out.println("\nPRUEBA 5: Listar organizaciones");
 
         for (Organizacion o : dao.listar()) {
             System.out.println(o);
         }
-    System.out.println("\nBuscar organización por ID:");
 
-Organizacion encontrada = dao.buscarPorId(1);
-if (encontrada != null) {
-    encontrada.setNombre("Organizacion SGC Actualizada");
-    encontrada.setDireccion("Medellin");
+        // PRUEBA 6: Buscar el registro por identificación
+        System.out.println("\nPRUEBA 6: Buscar organización");
 
-    boolean actualizado = dao.actualizar(encontrada);
+        int idPrueba = -1;
 
-    if (actualizado) {
-        System.out.println("Organizacion actualizada correctamente.");
-    } else {
-        System.out.println("No fue posible actualizar la organizacion.");
+        for (Organizacion o : dao.listar()) {
+            if ("EV02TEST001".equals(o.getIdentificacion())) {
+                idPrueba = o.getIdOrganizacion();
+                break;
+            }
+        }
+
+        if (idPrueba == -1) {
+            System.out.println("No se encontró el registro de prueba.");
+            return;
+        }
+
+        Organizacion encontrada = dao.buscarPorId(idPrueba);
+
+        if (encontrada == null) {
+            System.out.println("La búsqueda no devolvió resultados.");
+            return;
+        }
+
+        System.out.println("Organización encontrada: " + encontrada);
+
+        // PRUEBA 7: Actualizar el registro
+        System.out.println("\nPRUEBA 7: Actualizar organización");
+
+        encontrada.setNombre("Organizacion EV02 Actualizada");
+        encontrada.setDireccion("Medellin");
+
+        boolean actualizado = dao.actualizar(encontrada);
+
+        System.out.println("Resultado: "
+                + (actualizado ? "Actualización exitosa"
+                : "No fue posible actualizar"));
+
+        // PRUEBA 8: Eliminar el registro de prueba
+        System.out.println("\nPRUEBA 8: Eliminar organización");
+
+        boolean eliminado = dao.eliminar(idPrueba);
+
+        System.out.println("Resultado: "
+                + (eliminado ? "Eliminación exitosa"
+                : "No fue posible eliminar"));
+
+        System.out.println("\n==================================");
+        System.out.println(" FIN DE LAS PRUEBAS");
+        System.out.println("==================================");
     }
-
-    boolean eliminado = dao.eliminar(1);
-
-    if (eliminado) {
-        System.out.println("Organizacion eliminada correctamente.");
-    } else {
-        System.out.println("No fue posible eliminar la organizacion.");
-    }
-
-} else {
-    System.out.println("No se encontro la organizacion.");
 }
-    }
-    }
